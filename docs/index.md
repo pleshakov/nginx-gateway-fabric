@@ -33,7 +33,7 @@ The table below summarizes the options regarding the images, manifests, document
 
 | Version | Description | Image | Installation Manifests | Documentation and Examples |
 |-|-|-|-|-|
-| Latest release | For experimental use | Use the 0.1.0 image from [GitHub](https://github.com/nginxinc/nginx-kubernetes-gateway/pkgs/container/nginx-kubernetes-gateway) | [Manifests](https://github.com/nginxinc/nginx-kubernetes-gateway/tree/v0.1.0/deploy). | [Documentation](https://github.com/nginxinc/nginx-kubernetes-gateway/tree/v0.1.0/docs). [Examples](https://github.com/nginxinc/nginx-kubernetes-gateway/tree/v0.1.0/examples). |
+| Latest release | For experimental use | Use the 0.1.0 image from [GitHub](https://github.com/nginxinc/nginx-kubernetes-gateway/pkgs/container/nginx-kubernetes-gateway) | [Manifests](https://github.com/nginxinc/nginx-kubernetes-gateway/tree/v0.1.0/deploy). | This page | [Examples](https://github.com/nginxinc/nginx-kubernetes-gateway/tree/v0.1.0/examples). |
 | Edge | For experimental use and latest features | Use the edge image from [GitHub](https://github.com/nginxinc/nginx-kubernetes-gateway/pkgs/container/nginx-kubernetes-gateway) | [Manifests](https://github.com/nginxinc/nginx-kubernetes-gateway/tree/main/deploy). | [Documentation](https://github.com/nginxinc/nginx-kubernetes-gateway/tree/main/docs). [Examples](https://github.com/nginxinc/nginx-kubernetes-gateway/tree/main/examples). |
 
 ## Technical Specifications
