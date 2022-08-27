@@ -107,4 +107,4 @@ Create a Service with type `LoadBalancer` using the appropriate manifest for you
 
 ### Use NGINX Kubernetes Gateway
 
-To get started, follow the tutorials in the [examples](../examples) directory.
+To get started, follow the tutorials in the [examples](https://github.com/pleshakov/nginx-kubernetes-gateway/tree/v0.1.0/examples) directory.
