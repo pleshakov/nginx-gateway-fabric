@@ -17,7 +17,7 @@ make create-kind-cluster
     
 ## Deploy NGINX Kubernetes Gateway
 
-Follow the [installation](./installation.md) instructions to deploy NGINX Kubernetes Gateway on your Kind cluster. 
+Follow the [installation](./installation) instructions to deploy NGINX Kubernetes Gateway on your Kind cluster. 
 
 ## Access NGINX Kubernetes Gateway
 

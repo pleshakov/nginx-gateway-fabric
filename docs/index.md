@@ -9,9 +9,9 @@ For a list of supported Gateway API resources and features, see the [Gateway API
 
 ## Getting Started
 
-1. [Quick Start on a kind cluster](docs/running-on-kind.md).
-2. [Install](docs/installation.md) NGINX Kubernetes Gateway.
-3. [Build](docs/building-the-image.md) an NGINX Kubernetes Gateway container image from source or use a pre-built image available on [GitHub Container Registry](https://github.com/nginxinc/nginx-kubernetes-gateway/pkgs/container/nginx-kubernetes-gateway).
+1. [Quick Start on a kind cluster](docs/running-on-kind).
+2. [Install](docs/installation) NGINX Kubernetes Gateway.
+3. [Build](docs/building-the-image) an NGINX Kubernetes Gateway container image from source or use a pre-built image available on [GitHub Container Registry](https://github.com/nginxinc/nginx-kubernetes-gateway/pkgs/container/nginx-kubernetes-gateway).
 4. Deploy various [examples](https://github.com/pleshakov/nginx-kubernetes-gateway/tree/v0.1.0/examples). 
 
 ## NGINX Kubernetes Gateway Releases
@@ -33,7 +33,7 @@ The table below summarizes the options regarding the images, manifests, document
 
 | Version | Description | Image | Installation Manifests | Documentation and Examples |
 |-|-|-|-|-|
-| Latest release | For experimental use | Use the 0.1.0 image from [GitHub](https://github.com/nginxinc/nginx-kubernetes-gateway/pkgs/container/nginx-kubernetes-gateway) | [Manifests](https://github.com/nginxinc/nginx-kubernetes-gateway/tree/v0.1.0/deploy). | This page | [Examples](https://github.com/nginxinc/nginx-kubernetes-gateway/tree/v0.1.0/examples). |
+| Latest release | For experimental use | Use the 0.1.0 image from [GitHub](https://github.com/nginxinc/nginx-kubernetes-gateway/pkgs/container/nginx-kubernetes-gateway) | [Manifests](https://github.com/nginxinc/nginx-kubernetes-gateway/tree/v0.1.0/deploy). | Documentation is this page,  [Examples](https://github.com/nginxinc/nginx-kubernetes-gateway/tree/v0.1.0/examples). |
 | Edge | For experimental use and latest features | Use the edge image from [GitHub](https://github.com/nginxinc/nginx-kubernetes-gateway/pkgs/container/nginx-kubernetes-gateway) | [Manifests](https://github.com/nginxinc/nginx-kubernetes-gateway/tree/main/deploy). | [Documentation](https://github.com/nginxinc/nginx-kubernetes-gateway/tree/main/docs). [Examples](https://github.com/nginxinc/nginx-kubernetes-gateway/tree/main/examples). |
 
 ## Technical Specifications
@@ -50,7 +50,7 @@ We’d like to hear your feedback! If you have any suggestions or experience iss
 
 ## Contributing
 
-Please read our [[Contributing guide](https://github.com/pleshakov/nginx-kubernetes-gateway/blob/main/CONTRIBUTING.md) if you'd like to contribute to the project.
+Please read our [Contributing guide](https://github.com/pleshakov/nginx-kubernetes-gateway/blob/main/CONTRIBUTING.md) if you'd like to contribute to the project.
 
 ## Support
 
