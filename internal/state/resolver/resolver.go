@@ -59,7 +59,7 @@ func (e *ServiceResolverImpl) Resolve(ctx context.Context, svc *v1.Service, port
 		return nil, fmt.Errorf("no endpoints found for Service %s", client.ObjectKeyFromObject(svc))
 	}
 
-	return resolveEndpoints(svc, port, endpointSliceList)
+	return resolveEndpointsSecond(svc, port, endpointSliceList)
 }
 
 func resolveEndpoints(
@@ -82,6 +82,69 @@ func resolveEndpoints(
 	// Endpoints may be duplicated across multiple EndpointSlices.
 	// Using a set to prevent returning duplicate endpoints.
 	endpointSet := make(map[Endpoint]struct{})
+
+	for _, eps := range filteredSlices {
+		for _, endpoint := range eps.Endpoints {
+
+			if !endpointReady(endpoint) {
+				continue
+			}
+
+			// We don't check for a zero port value here because we are only working with EndpointSlices
+			// that have a matching port.
+			endpointPort := findPort(eps.Ports, svcPort)
+
+			for _, address := range endpoint.Addresses {
+				ep := Endpoint{Address: address, Port: endpointPort}
+				endpointSet[ep] = struct{}{}
+			}
+		}
+	}
+
+	endpoints := make([]Endpoint, 0, len(endpointSet))
+	for ep := range endpointSet {
+		endpoints = append(endpoints, ep)
+	}
+
+	return endpoints, nil
+}
+
+func resolveEndpointsSecond(
+	svc *v1.Service,
+	port int32,
+	endpointSliceList discoveryV1.EndpointSliceList,
+) ([]Endpoint, error) {
+	svcPort, err := getServicePort(svc, port)
+	if err != nil {
+		return nil, err
+	}
+
+	filteredSlices := filterEndpointSliceList(endpointSliceList, svcPort)
+
+	if len(filteredSlices) == 0 {
+		svcNsName := client.ObjectKeyFromObject(svc)
+		return nil, fmt.Errorf("no valid endpoints found for Service %s and port %+v", svcNsName, svcPort)
+	}
+
+	total := 0
+
+	// Calculate the total number of endpoints.
+	for _, eps := range filteredSlices {
+		for _, endpoint := range eps.Endpoints {
+
+			if !endpointReady(endpoint) {
+				continue
+			}
+
+			total += len(endpoint.Addresses)
+		}
+	}
+
+	// Endpoints may be duplicated across multiple EndpointSlices.
+	// Using a set to prevent returning duplicate endpoints.
+
+	// Initialize the map with the total number of endpoints.
+	endpointSet := make(map[Endpoint]struct{}, total)
 
 	for _, eps := range filteredSlices {
 		for _, endpoint := range eps.Endpoints {
