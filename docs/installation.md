@@ -34,6 +34,12 @@ This guide walks you through how to install NGINX Kubernetes Gateway on a generi
     ```
     kubectl create configmap njs-modules --from-file=internal/nginx/modules/src/httpmatches.js -n nginx-gateway
     ```
+   
+1. Create the NGINX config template ConfigMap:
+
+    ```
+    kubectl create configmap nginx-config-template --from-file=deploy/manifests/nginx-config-template.tmpl -n nginx-gateway
+    ```
 
 1. Create the GatewayClass resource:
 

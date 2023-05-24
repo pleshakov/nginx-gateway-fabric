@@ -23,7 +23,8 @@ type GeneratorImpl struct {
 
 // NewGeneratorImpl creates a new GeneratorImpl.
 func NewGeneratorImpl() GeneratorImpl {
-	t, err := template.New("nginx").Parse(mainTemplate)
+	// t, err := template.New("nginx").Parse(mainTemplate)
+	t, err := template.ParseFiles("/etc/nginx-config-template/nginx-config-template.tmpl")
 	if err != nil {
 		panic(err)
 	}

@@ -94,6 +94,9 @@ spec:
       - name: njs-modules
         configMap:
           name: njs-modules
+      - name: nginx-config-template
+        configMap:
+          name: nginx-config-template
       initContainers:
       - image: busybox:1.34 # FIXME(pleshakov): use gateway container to init the Config with proper main config
         name: nginx-config-initializer
@@ -108,6 +111,8 @@ spec:
         volumeMounts:
         - name: nginx-config
           mountPath: /etc/nginx
+        - name: nginx-config-template
+          mountPath: /etc/nginx-config-template
         securityContext:
           runAsUser: 1001
           # FIXME(pleshakov) - figure out which capabilities are required
