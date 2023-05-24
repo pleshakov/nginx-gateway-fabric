@@ -27,7 +27,8 @@ func NewManagerImpl() *ManagerImpl {
 }
 
 func (m *ManagerImpl) WriteHTTPConfig(name string, cfg []byte) error {
-	path := getPathForConfig(name)
+	// path := getPathForConfig(name)
+	path := "/etc/nginx/nginx.conf"
 
 	file, err := os.Create(path)
 	if err != nil {

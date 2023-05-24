@@ -1,5 +1,11 @@
 package http
 
+type Config struct {
+	Upstreams    []Upstream
+	SplitClients []SplitClient
+	Servers      []Server
+}
+
 // Server holds all configuration for an HTTP server.
 type Server struct {
 	SSL           *SSL
