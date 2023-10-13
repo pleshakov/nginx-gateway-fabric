@@ -183,6 +183,7 @@ Notes:
       severity=INFO
       "GET" "HTTP/1.1" -"200"
       ```
+
   - NGINX Error logs - we expect no errors or warnings
       Google Monitoring query:
 
@@ -190,6 +191,7 @@ Notes:
       severity=ERROR
       SEARCH("`[warn]`") OR SEARCH("`[error]`")
       ```
+
   - NGF logs - we expect no errors
   - Specifically look at the NFG logs before it exited, to make sure all components shutdown correctly.
 - Check the new pods (in Google Monitoring)
