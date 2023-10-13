@@ -7,19 +7,19 @@ interruptions to the traffic they send to applications exposed via NGF.
 
 <!-- TOC -->
 
-* [Zero-Downtime Upgrades](#zero-downtime-upgrades)
-    * [Goals](#goals)
-    * [Non-Goals](#non-goals)
-    * [Test Environment](#test-environment)
-    * [Steps](#steps)
-        * [Start](#start)
-        * [Upgrade](#upgrade)
-        * [After Upgrade](#after-upgrade)
-        * [Analyze](#analyze)
-    * [Results](#results)
-    * [Appendix](#appendix)
-        * [Pod Affinity](#pod-affinity)
-        * [Converting Curl Output to a Graph](#converting-curl-output-to-a-graph)
+- [Zero-Downtime Upgrades](#zero-downtime-upgrades)
+  - [Goals](#goals)
+  - [Non-Goals](#non-goals)
+  - [Test Environment](#test-environment)
+  - [Steps](#steps)
+    - [Start](#start)
+    - [Upgrade](#upgrade)
+    - [After Upgrade](#after-upgrade)
+    - [Analyze](#analyze)
+  - [Results](#results)
+  - [Appendix](#appendix)
+    - [Pod Affinity](#pod-affinity)
+    - [Converting Curl Output to a Graph](#converting-curl-output-to-a-graph)
 
 <!-- TOC -->
 
@@ -47,32 +47,32 @@ in this case.
 ## Test Environment
 
 - A Kubernetes cluster with 10 nodes on GKE
-    - Node: e2-medium (2 vCPU, 4GB memory)
-    - Enabled GKE logging.
+  - Node: e2-medium (2 vCPU, 4GB memory)
+  - Enabled GKE logging.
 - Tester VMs on Google Cloud Platform:
-    - Configuration:
-        - Debian
-        - Install packages: wrk, curl, gnuplot
-    - Location - same zone as the Kubernetes cluster.
-    - First VM for HTTP traffic
-    - Second VM - for sending HTTPs traffic
+  - Configuration:
+    - Debian
+    - Install packages: wrk, curl, gnuplot
+  - Location - same zone as the Kubernetes cluster.
+  - First VM for HTTP traffic
+  - Second VM - for sending HTTPs traffic
 - NGF
-    - Deployment with 2 replicas scheduled on different nodes.
-    - Exposed via a Service with type LoadBalancer, private IP
-    - Gateway, two listeners - HTTP and HTTPs
-    - Two backends:
-        - Coffee - 3 replicas
-        - Tea - 3 replicas
-    - Two HTTPRoutes
-        - Coffee (HTTP)
-        - Tea (HTTPS)
+  - Deployment with 2 replicas scheduled on different nodes.
+  - Exposed via a Service with type LoadBalancer, private IP
+  - Gateway, two listeners - HTTP and HTTPs
+  - Two backends:
+    - Coffee - 3 replicas
+    - Tea - 3 replicas
+  - Two HTTPRoutes
+    - Coffee (HTTP)
+    - Tea (HTTPS)
 
 Notes:
 
 - For sending traffic, we will use both wrk and curl.
-    - *wrk* will generate a lot of traffic continuously, and it will have a high chance of catching of any
+  - *wrk* will generate a lot of traffic continuously, and it will have a high chance of catching of any
       (however small) periods of downtime.
-    - *curl* will generate 1 request every 0.1s. While it might not catch small periods of downtime, it will
+  - *curl* will generate 1 request every 0.1s. While it might not catch small periods of downtime, it will
       give us timeline of failed request for big periods of downtime, which wrk doesn't do.
 - We use pod anti-affinity to tell Kubernetes to schedule NGF pods on different nodes. We also use a 10 node cluster so
   that the chance of Kubernetes scheduling new pods on the same
@@ -89,18 +89,24 @@ Notes:
 3. Expose NGF via a Service Load Balancer, internal (only accessible within the Google Cloud region) by adding
    `networking.gke.io/load-balancer-type: "Internal"` annotation to the Service.
 4. Deploy backend apps:
+
     ```console
-    kubectl apply -f manifests/cafe.yaml 
+    kubectl apply -f manifests/cafe.yaml
     ```
+
 5. Configure Gateway:
+
     ```console
     kubectl apply -f manifests/cafe-secret.yaml
     kubectl apply -f manifests/gateway.yaml
     ```
+
 6. Expose apps via HTTPRoutes
+
     ```console
     kubectl apply -f manifests/cafe-routes.yaml
     ```
+
 7. Check statuses of the Gateway and HTTPRoutes for errors.
 8. In Google Monitoring, check NGF and NGINX error logs for errors.
 9. In Tester VMs, update `/etc/hosts` to have an entry with the External IP of the NGF Service (`10.128.0.10` in this
@@ -118,22 +124,30 @@ Notes:
 2. Start sending traffic using wrk from tester VMs for 1 minute:
     - Tester VM 1:
         - wrk:
+
           ```console
-          wrk -t2 -c100 -d60s --latency --timeout 2s  http://cafe.example.com/coffee 
+          wrk -t2 -c100 -d60s --latency --timeout 2s  http://cafe.example.com/coffee
           ```
+
         - curl:
+
           ```console
           for i in `seq 1 600`; do printf  "\nRequest $i\n" && date --rfc-3339=ns && curl -sS --connect-timeout 2 http://cafe.example.com/coffee 2>&1  && sleep 0.1s; done > results.txt
           ```
+
     - Tester VM 2:
         - wrk:
+
           ```console
-          wrk -t2 -c100 -d60s --latency --timeout 2s  https://cafe.example.com/tea 
+          wrk -t2 -c100 -d60s --latency --timeout 2s  https://cafe.example.com/tea
           ```
+
         - curl:
+
           ```console
           for i in `seq 1 600`; do printf  "\nRequest $i\n" && date --rfc-3339=ns && curl -k -sS --connect-timeout 2 https://cafe.example.com/tea 2>&1  && sleep 0.1s; done > results.txt
           ```
+
 3. **Immediately** upgrade NFG manifests by
    following [upgrade instructions](/docs/installation.md#upgrade-nginx-gateway-fabric-from-manifests).
    > Don't forget to modify the manifests to have 2 replicas and pod affinity.
@@ -142,40 +156,46 @@ Notes:
 ### After Upgrade
 
 1. Update the Gateway resource by adding one new listener `http-new`:
+
     ```console
     kubectl apply -f manifests/gateway-updated.yaml
     ```
+
 2. Check that at NGF has a leader elected among the new pods:
+
     ```console
     kubectl -n nginx-gateway logs <nkg-pod> | grep leader
     ```
+
 3. Ensure the status of the Gateway resource includes the new listener.
 
 ### Analyze
 
 - Tester VMs:
-    - Analyze the output of wrk commands for errors and latencies.
-    - Create graphs from curl output (see [instructions](#converting-curl-output-to-a-graph) in Appendix) and check for
+  - Analyze the output of wrk commands for errors and latencies.
+  - Create graphs from curl output (see [instructions](#converting-curl-output-to-a-graph) in Appendix) and check for
       any failures on them.
 - Check the old pods logs in Google Monitoring
-    - NGINX Access logs - we expect only 200 responses.
+  - NGINX Access logs - we expect only 200 responses.
       Google Monitoring query:
+
       ```text
       severity=INFO
       "GET" "HTTP/1.1" -"200"
       ```
-    - NGINX Error logs - we expect no errors or warnings
+  - NGINX Error logs - we expect no errors or warnings
       Google Monitoring query:
+
       ```text
       severity=ERROR
       SEARCH("`[warn]`") OR SEARCH("`[error]`")
       ```
-    - NGF logs - we expect no errors
-    - Specifically look at the NFG logs before it exited, to make sure all components shutdown correctly.
+  - NGF logs - we expect no errors
+  - Specifically look at the NFG logs before it exited, to make sure all components shutdown correctly.
 - Check the new pods (in Google Monitoring)
-    - NGINX Access logs - only 200 responses.
-    - NGINX Error logs - no errors or warnings.
-    - NGF logs - no errors
+  - NGINX Access logs - only 200 responses.
+  - NGINX Error logs - no errors or warnings.
+  - NGF logs - no errors
 
 ## Results
 
@@ -186,6 +206,7 @@ Notes:
 ### Pod Affinity
 
 - To ensure Kubernetes doesn't schedule NFG pods on the same nodes, use an anti-affinity rule:
+
     ```yaml
         spec:
           affinity:
@@ -203,6 +224,7 @@ The output of a curl command is saved in `results.txt`. To convert it into a gra
 go through the following steps:
 
 1. Convert the output into a csv file:
+
     ```console
     awk '
     /Request [0-9]+/ {
@@ -216,10 +238,13 @@ go through the following steps:
         }
     }' results.txt > results.csv
     ```
+
 2. Plot a graph using the csv file:
+
     ```console
     gnuplot requests-plot.gp
     ```
+
    As a result, gnuplot will create `graph.png` with a graph.
 3. Download the resulting `graph.png` to you local machine.
 4. Also download `results.csv`.
