@@ -2,6 +2,7 @@ package static
 
 import (
 	"context"
+	"time"
 
 	"github.com/go-logr/logr"
 	"go.opentelemetry.io/otel"
@@ -12,7 +13,6 @@ import (
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
-	v1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -29,6 +29,33 @@ type telemetryReporter struct {
 	logger    logr.Logger
 }
 
+func ReportAndSleep(logger logr.Logger) {
+
+	reporter := telemetryReporter{
+		logger: logger,
+	}
+
+	logger.Info("reporting telemetry")
+
+	err := reporter.Start(context.Background())
+	if err != nil {
+		panic(err)
+	}
+
+	logger.Info("sleeping for 1 hour")
+
+	time.Sleep(1 * time.Hour)
+
+	logger.Info("reporting telemetry")
+
+	err = reporter.Start(context.Background())
+	if err != nil {
+		panic(err)
+	}
+
+	logger.Info("finished reporting telemetry")
+}
+
 func (r *telemetryReporter) Start(ctx context.Context) error {
 	// runs once in a POC.
 
@@ -36,20 +63,21 @@ func (r *telemetryReporter) Start(ctx context.Context) error {
 	var (
 		// /otel-collector/README.md deploys a collector with the endpoint below
 		// no TLS or auth headers are needed for that collector
-		endpoint = "my-opentelemetry-collector.default.svc.cluster.local:4317"
+		endpoint = "10.60.0.5:4317"
 		secure   = false               // use TLS or not.
 		headers  = map[string]string{} // allows t add headers to a GRPC connection. (e.g. authentication)
 	)
 
 	// gather telemetry data
-	var ns v1.Namespace
-	err := r.k8sClient.Get(ctx, client.ObjectKey{Name: "kube-system"}, &ns)
-	if err != nil {
-		return err
-	}
+	//var ns v1.Namespace
+	//err := r.k8sClient.Get(ctx, client.ObjectKey{Name: "kube-system"}, &ns)
+	//if err != nil {
+	//	return err
+	//}
 
 	// cluster ID (UUID of kube-system namespace)
-	clusterID := string(ns.UID)
+	//clusterID := string(ns.UID)
+	clusterID := "my-cluster-1"
 	// NGF version
 	ngfVersion := "product-tel-prototype-0.0.1"
 

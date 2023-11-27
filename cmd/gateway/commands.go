@@ -333,6 +333,11 @@ func createSleepCommand() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			// It is expected that this command is run from lifecycle hook.
 			// Because logs from hooks are not visible in the container logs, we don't log here at all.
+
+			logger := ctlrZap.New()
+
+			static.ReportAndSleep(logger)
+
 			time.Sleep(duration)
 		},
 	}
