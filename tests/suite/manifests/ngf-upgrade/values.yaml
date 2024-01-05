@@ -1,22 +1,22 @@
 nginxGateway:
   replicaCount: 2
-  lifecycle:
-    preStop:
-      exec:
-        command:
-        - /usr/bin/gateway
-        - sleep
-        - --duration=40s
+#  lifecycle:
+#    preStop:
+#      exec:
+#        command:
+#        - /usr/bin/gateway
+#        - sleep
+#        - --duration=40s
 
-nginx:
-  lifecycle:
-    preStop:
-      exec:
-        command:
-        - /bin/sleep
-        - "40"
+#nginx:
+#  lifecycle:
+#    preStop:
+#      exec:
+#        command:
+#        - /bin/sleep
+#        - "40"
 
-terminationGracePeriodSeconds: 50
+#terminationGracePeriodSeconds: 50
 
 affinity:
   podAntiAffinity:
