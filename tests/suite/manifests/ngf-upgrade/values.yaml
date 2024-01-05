@@ -1,20 +1,20 @@
 nginxGateway:
   replicaCount: 2
-#  lifecycle:
-#    preStop:
-#      exec:
-#        command:
-#        - /usr/bin/gateway
-#        - sleep
-#        - --duration=40s
+  lifecycle:
+    preStop:
+      exec:
+        command:
+        - /usr/bin/gateway
+        - sleep
+        - --duration=10s
 
-#nginx:
-#  lifecycle:
-#    preStop:
-#      exec:
-#        command:
-#        - /bin/sleep
-#        - "40"
+nginx:
+  lifecycle:
+    preStop:
+      exec:
+        command:
+        - /bin/sleep
+        - "10"
 
 #terminationGracePeriodSeconds: 50
 
