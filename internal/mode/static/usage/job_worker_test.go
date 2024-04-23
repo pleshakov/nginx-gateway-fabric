@@ -15,7 +15,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	"github.com/nginxinc/nginx-gateway-fabric/internal/framework/events/eventsfakes"
+	"github.com/nginxinc/nginx-gateway-fabric/framework/events/eventsfakes"
 	"github.com/nginxinc/nginx-gateway-fabric/internal/mode/static/config"
 	"github.com/nginxinc/nginx-gateway-fabric/internal/mode/static/usage"
 	"github.com/nginxinc/nginx-gateway-fabric/internal/mode/static/usage/usagefakes"

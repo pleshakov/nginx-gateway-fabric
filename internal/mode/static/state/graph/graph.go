@@ -10,7 +10,7 @@ import (
 	"sigs.k8s.io/gateway-api/apis/v1alpha2"
 	"sigs.k8s.io/gateway-api/apis/v1beta1"
 
-	"github.com/nginxinc/nginx-gateway-fabric/internal/framework/controller/index"
+	"github.com/nginxinc/nginx-gateway-fabric/framework/controller/index"
 	"github.com/nginxinc/nginx-gateway-fabric/internal/mode/static/state/validation"
 )
 

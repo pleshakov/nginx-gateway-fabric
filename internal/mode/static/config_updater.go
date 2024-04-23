@@ -12,7 +12,7 @@ import (
 	"k8s.io/client-go/tools/record"
 
 	ngfAPI "github.com/nginxinc/nginx-gateway-fabric/apis/v1alpha1"
-	"github.com/nginxinc/nginx-gateway-fabric/internal/framework/helpers"
+	"github.com/nginxinc/nginx-gateway-fabric/framework/helpers"
 )
 
 // updateControlPlane updates the control plane configuration with the given user spec.

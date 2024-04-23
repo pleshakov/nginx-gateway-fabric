@@ -17,9 +17,9 @@ import (
 	"sigs.k8s.io/gateway-api/apis/v1alpha2"
 
 	ngfAPI "github.com/nginxinc/nginx-gateway-fabric/apis/v1alpha1"
-	"github.com/nginxinc/nginx-gateway-fabric/internal/framework/conditions"
-	"github.com/nginxinc/nginx-gateway-fabric/internal/framework/helpers"
-	statusFramework "github.com/nginxinc/nginx-gateway-fabric/internal/framework/status"
+	"github.com/nginxinc/nginx-gateway-fabric/framework/conditions"
+	"github.com/nginxinc/nginx-gateway-fabric/framework/helpers"
+	statusFramework "github.com/nginxinc/nginx-gateway-fabric/framework/status"
 	staticConds "github.com/nginxinc/nginx-gateway-fabric/internal/mode/static/state/conditions"
 	"github.com/nginxinc/nginx-gateway-fabric/internal/mode/static/state/graph"
 )

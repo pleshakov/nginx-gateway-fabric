@@ -8,8 +8,8 @@ import (
 	gatewayv1alpha2 "sigs.k8s.io/gateway-api/apis/v1alpha2"
 
 	ngfAPI "github.com/nginxinc/nginx-gateway-fabric/apis/v1alpha1"
-	"github.com/nginxinc/nginx-gateway-fabric/internal/framework/helpers"
-	frameworkStatus "github.com/nginxinc/nginx-gateway-fabric/internal/framework/status"
+	"github.com/nginxinc/nginx-gateway-fabric/framework/helpers"
+	frameworkStatus "github.com/nginxinc/nginx-gateway-fabric/framework/status"
 )
 
 func newNginxGatewayStatusSetter(status ngfAPI.NginxGatewayStatus) frameworkStatus.Setter {

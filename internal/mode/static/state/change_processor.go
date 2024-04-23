@@ -19,7 +19,7 @@ import (
 	"sigs.k8s.io/gateway-api/apis/v1alpha2"
 	"sigs.k8s.io/gateway-api/apis/v1beta1"
 
-	"github.com/nginxinc/nginx-gateway-fabric/internal/framework/gatewayclass"
+	"github.com/nginxinc/nginx-gateway-fabric/framework/gatewayclass"
 	"github.com/nginxinc/nginx-gateway-fabric/internal/mode/static/state/graph"
 	"github.com/nginxinc/nginx-gateway-fabric/internal/mode/static/state/validation"
 )

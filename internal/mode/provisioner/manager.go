@@ -16,11 +16,11 @@ import (
 	gatewayv1 "sigs.k8s.io/gateway-api/apis/v1"
 
 	embeddedfiles "github.com/nginxinc/nginx-gateway-fabric"
-	"github.com/nginxinc/nginx-gateway-fabric/internal/framework/controller"
-	"github.com/nginxinc/nginx-gateway-fabric/internal/framework/controller/predicate"
-	"github.com/nginxinc/nginx-gateway-fabric/internal/framework/events"
-	"github.com/nginxinc/nginx-gateway-fabric/internal/framework/gatewayclass"
-	"github.com/nginxinc/nginx-gateway-fabric/internal/framework/status"
+	"github.com/nginxinc/nginx-gateway-fabric/framework/controller"
+	"github.com/nginxinc/nginx-gateway-fabric/framework/controller/predicate"
+	"github.com/nginxinc/nginx-gateway-fabric/framework/events"
+	"github.com/nginxinc/nginx-gateway-fabric/framework/gatewayclass"
+	"github.com/nginxinc/nginx-gateway-fabric/framework/status"
 )
 
 // Config is configuration for the provisioner mode.

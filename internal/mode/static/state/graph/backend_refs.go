@@ -10,8 +10,8 @@ import (
 	gatewayv1 "sigs.k8s.io/gateway-api/apis/v1"
 	v1alpha2 "sigs.k8s.io/gateway-api/apis/v1alpha2"
 
-	"github.com/nginxinc/nginx-gateway-fabric/internal/framework/conditions"
-	"github.com/nginxinc/nginx-gateway-fabric/internal/framework/helpers"
+	"github.com/nginxinc/nginx-gateway-fabric/framework/conditions"
+	"github.com/nginxinc/nginx-gateway-fabric/framework/helpers"
 	"github.com/nginxinc/nginx-gateway-fabric/internal/mode/static/sort"
 	staticConds "github.com/nginxinc/nginx-gateway-fabric/internal/mode/static/state/conditions"
 )

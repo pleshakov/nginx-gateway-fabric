@@ -17,9 +17,9 @@ import (
 	gatewayv1 "sigs.k8s.io/gateway-api/apis/v1"
 
 	ngfAPI "github.com/nginxinc/nginx-gateway-fabric/apis/v1alpha1"
-	"github.com/nginxinc/nginx-gateway-fabric/internal/framework/events"
-	"github.com/nginxinc/nginx-gateway-fabric/internal/framework/helpers"
-	frameworkStatus "github.com/nginxinc/nginx-gateway-fabric/internal/framework/status"
+	"github.com/nginxinc/nginx-gateway-fabric/framework/events"
+	"github.com/nginxinc/nginx-gateway-fabric/framework/helpers"
+	frameworkStatus "github.com/nginxinc/nginx-gateway-fabric/framework/status"
 	"github.com/nginxinc/nginx-gateway-fabric/internal/mode/static/config"
 	ngfConfig "github.com/nginxinc/nginx-gateway-fabric/internal/mode/static/config"
 	ngxConfig "github.com/nginxinc/nginx-gateway-fabric/internal/mode/static/nginx/config"
