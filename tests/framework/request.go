@@ -3,6 +3,7 @@ package framework
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
 	"fmt"
 	"net"
 	"net/http"
@@ -16,14 +17,27 @@ import (
 func Get(url, address string, timeout time.Duration) (int, string, error) {
 	dialer := &net.Dialer{}
 
-	http.DefaultTransport.(*http.Transport).DialContext = func(
-		ctx context.Context,
-		network,
-		addr string,
-	) (net.Conn, error) {
-		split := strings.Split(addr, ":")
-		port := split[len(split)-1]
-		return dialer.DialContext(ctx, network, fmt.Sprintf("%s:%s", address, port))
+	transport := &http.Transport{
+		DialContext: func(
+			ctx context.Context,
+			network,
+			addr string,
+		) (net.Conn, error) {
+			split := strings.Split(addr, ":")
+			port := split[len(split)-1]
+			return dialer.DialContext(ctx, network, fmt.Sprintf("%s:%s", address, port))
+		},
+	}
+
+	client := &http.Client{
+		Transport: transport,
+		Timeout:   timeout,
+	}
+
+	if strings.HasPrefix(url, "https") {
+		t := client.Transport.(*http.Transport).Clone()
+		t.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+		client.Transport = t
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
@@ -34,7 +48,7 @@ func Get(url, address string, timeout time.Duration) (int, string, error) {
 		return 0, "", err
 	}
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := client.Do(req)
 	if err != nil {
 		return 0, "", err
 	}
