@@ -158,7 +158,13 @@ func createBackendRef(
 	if ref.Namespace != nil {
 		ns = string(*ref.Namespace)
 	}
+
 	svcNsName := types.NamespacedName{Name: string(ref.Name), Namespace: ns}
+
+	if ref.Group != nil && *ref.Group == "inference.networking.x-k8s.io" && ref.Kind != nil && *ref.Kind == "InferencePool" {
+		svcNsName = types.NamespacedName{"ai-gateway", "aigw"}
+	}
+
 	svcIPFamily, svcPort, err := getIPFamilyAndPortFromRef(ref.BackendRef, svcNsName, services, refPath)
 	if err != nil {
 		backendRef := BackendRef{
@@ -311,8 +317,13 @@ func getIPFamilyAndPortFromRef(
 		return []v1.IPFamily{}, v1.ServicePort{}, field.NotFound(refPath.Child("name"), ref.Name)
 	}
 
+	var port int32 = 80
+	if ref.Port != nil {
+		port = int32(*ref.Port)
+	}
+
 	// safe to dereference port here because we already validated that the port is not nil in validateBackendRef.
-	svcPort, err := getServicePort(svc, int32(*ref.Port))
+	svcPort, err := getServicePort(svc, port)
 	if err != nil {
 		return []v1.IPFamily{}, v1.ServicePort{}, err
 	}
@@ -374,14 +385,19 @@ func validateBackendRef(
 ) (valid bool, cond conditions.Condition) {
 	// Because all errors cause same condition but different reasons, we return as soon as we find an error
 
-	if ref.Group != nil && (*ref.Group != "core" && *ref.Group != "") {
-		valErr := field.NotSupported(path.Child("group"), *ref.Group, []string{"core", ""})
-		return false, conditions.NewRouteBackendRefInvalidKind(valErr.Error())
-	}
+	if ref.Group != nil && *ref.Group == "inference.networking.x-k8s.io" && ref.Kind != nil && *ref.Kind == "InferencePool" {
+		// it's all right
+	} else {
 
-	if ref.Kind != nil && *ref.Kind != "Service" {
-		valErr := field.NotSupported(path.Child("kind"), *ref.Kind, []string{"Service"})
-		return false, conditions.NewRouteBackendRefInvalidKind(valErr.Error())
+		if ref.Group != nil && (*ref.Group != "core" && *ref.Group != "") {
+			valErr := field.NotSupported(path.Child("group"), *ref.Group, []string{"core", ""})
+			return false, conditions.NewRouteBackendRefInvalidKind(valErr.Error())
+		}
+
+		if ref.Kind != nil && *ref.Kind != "Service" {
+			valErr := field.NotSupported(path.Child("kind"), *ref.Kind, []string{"Service"})
+			return false, conditions.NewRouteBackendRefInvalidKind(valErr.Error())
+		}
 	}
 
 	// no need to validate ref.Name
@@ -397,9 +413,13 @@ func validateBackendRef(
 		}
 	}
 
-	if ref.Port == nil {
-		valErr := field.Required(path.Child("port"), "port cannot be nil")
-		return false, conditions.NewRouteBackendRefUnsupportedValue(valErr.Error())
+	if ref.Group != nil && *ref.Group == "inference.networking.x-k8s.io" && ref.Kind != nil && *ref.Kind == "InferencePool" {
+		// ok
+	} else {
+		if ref.Port == nil {
+			valErr := field.Required(path.Child("port"), "port cannot be nil")
+			return false, conditions.NewRouteBackendRefUnsupportedValue(valErr.Error())
+		}
 	}
 
 	// any value of port is OK

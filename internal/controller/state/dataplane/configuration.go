@@ -535,11 +535,26 @@ func (hpr *hostPathRules) upsertRoute(
 		}
 
 		var filters HTTPFilters
+
 		if rule.Filters.Valid {
 			filters = createHTTPFilters(rule.Filters.Filters, idx)
 		} else {
 			filters = HTTPFilters{
 				InvalidFilter: &InvalidHTTPFilter{},
+			}
+		}
+
+		ref := rule.RouteBackendRefs[idx]
+		if ref.Group != nil && *ref.Group == "inference.networking.x-k8s.io" && ref.Kind != nil && *ref.Kind == "InferencePool" {
+			filters = HTTPFilters{
+				RequestHeaderModifiers: &HTTPHeaderFilter{
+					Set: []HTTPHeader{
+						{
+							Name:  "X-Inference-Pool",
+							Value: route.Source.GetNamespace() + "/" + string(ref.Name),
+						},
+					},
+				},
 			}
 		}
 

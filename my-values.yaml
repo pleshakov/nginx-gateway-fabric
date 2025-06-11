@@ -1,0 +1,12 @@
+nginxGateway:
+  productTelemetry:
+    enable: false
+  image:
+    repository: us-east1-docker.pkg.dev/<REDACTED>/michael-p-aigw/ngf
+    tag: edge
+    pullPolicy: Always
+nginx:
+  image:
+    repository: us-east1-docker.pkg.dev/<REDACTED>/michael-p-aigw/ngf/nginx
+    tag: edge
+    pullPolicy: Always

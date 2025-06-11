@@ -283,6 +283,51 @@ func TestBuildGraph(t *testing.T) {
 		}
 	}
 
+	aigwHR := &gatewayv1.HTTPRoute{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: testNs,
+			Name:      "gateway-1",
+		},
+		Spec: gatewayv1.HTTPRouteSpec{
+			CommonRouteSpec: gatewayv1.CommonRouteSpec{
+				ParentRefs: []gatewayv1.ParentReference{
+					{
+						Namespace:   (*gatewayv1.Namespace)(helpers.GetPointer(testNs)),
+						Name:        gatewayv1.ObjectName("gateway-1"),
+						SectionName: (*gatewayv1.SectionName)(helpers.GetPointer("listener-80-1")),
+					},
+				},
+			},
+			Hostnames: []gatewayv1.Hostname{
+				"aigw.example.com",
+			},
+			Rules: []gatewayv1.HTTPRouteRule{
+				{
+					Matches: []gatewayv1.HTTPRouteMatch{
+						{
+							Path: &gatewayv1.HTTPPathMatch{
+								Type:  helpers.GetPointer(gatewayv1.PathMatchPathPrefix),
+								Value: helpers.GetPointer("/aigw"),
+							},
+						},
+					},
+					BackendRefs: []gatewayv1.HTTPBackendRef{
+						{
+							BackendRef: gatewayv1.BackendRef{
+								BackendObjectReference: gatewayv1.BackendObjectReference{
+									Group:     (*gatewayv1.Group)(helpers.GetPointer("inference.networking.x-k8s.io")),
+									Kind:      (*gatewayv1.Kind)(helpers.GetPointer("InferencePool")),
+									Name:      "aigw",
+									Namespace: (*gatewayv1.Namespace)(helpers.GetPointer(testNs)),
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
 	hr1 := createRoute("hr-1", "gateway-1", "listener-80-1")
 	addFilterToPath(
 		hr1,
@@ -364,6 +409,14 @@ func TestBuildGraph(t *testing.T) {
 	ns := &v1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: testNs,
+			Labels: map[string]string{
+				"app": "allowed",
+			},
+		},
+	}
+	aiGatewayNs := &v1.Namespace{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "ai-gateway",
 			Labels: map[string]string{
 				"app": "allowed",
 			},
@@ -488,6 +541,19 @@ func TestBuildGraph(t *testing.T) {
 	svc1 := &v1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "test", Name: "foo2",
+		},
+		Spec: v1.ServiceSpec{
+			Ports: []v1.ServicePort{
+				{
+					Port: 80,
+				},
+			},
+		},
+	}
+
+	aigwSvc := &v1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "ai-gateway", Name: "aigw",
 		},
 		Spec: v1.ServiceSpec{
 			Ports: []v1.ServicePort{
@@ -686,9 +752,10 @@ func TestBuildGraph(t *testing.T) {
 				client.ObjectKeyFromObject(gw2.Source): gw2.Source,
 			},
 			HTTPRoutes: map[types.NamespacedName]*gatewayv1.HTTPRoute{
-				client.ObjectKeyFromObject(hr1): hr1,
-				client.ObjectKeyFromObject(hr2): hr2,
-				client.ObjectKeyFromObject(hr3): hr3,
+				client.ObjectKeyFromObject(hr1):    hr1,
+				client.ObjectKeyFromObject(hr2):    hr2,
+				client.ObjectKeyFromObject(hr3):    hr3,
+				client.ObjectKeyFromObject(aigwHR): aigwHR,
 			},
 			TLSRoutes: map[types.NamespacedName]*v1alpha2.TLSRoute{
 				client.ObjectKeyFromObject(tr):  tr,
@@ -698,11 +765,13 @@ func TestBuildGraph(t *testing.T) {
 				client.ObjectKeyFromObject(gr): gr,
 			},
 			Services: map[types.NamespacedName]*v1.Service{
-				client.ObjectKeyFromObject(svc):  svc,
-				client.ObjectKeyFromObject(svc1): svc1,
+				client.ObjectKeyFromObject(svc):     svc,
+				client.ObjectKeyFromObject(svc1):    svc1,
+				client.ObjectKeyFromObject(aigwSvc): aigwSvc,
 			},
 			Namespaces: map[types.NamespacedName]*v1.Namespace{
-				client.ObjectKeyFromObject(ns): ns,
+				client.ObjectKeyFromObject(ns):          ns,
+				client.ObjectKeyFromObject(aiGatewayNs): aiGatewayNs,
 			},
 			ReferenceGrants: map[types.NamespacedName]*v1beta1.ReferenceGrant{
 				client.ObjectKeyFromObject(rgSecret):              rgSecret,
@@ -992,6 +1061,76 @@ func TestBuildGraph(t *testing.T) {
 		{Kind: gatewayv1.Kind(kinds.GRPCRoute), Group: helpers.GetPointer[gatewayv1.Group](gatewayv1.GroupName)},
 	}
 
+	aigwR := &L7Route{
+		RouteType:  RouteTypeHTTP,
+		Valid:      true,
+		Attachable: true,
+		Source:     aigwHR,
+		ParentRefs: []ParentRef{
+			{
+				Idx: 0,
+				Gateway: &ParentRefGateway{
+					NamespacedName:      client.ObjectKeyFromObject(gw1.Source),
+					EffectiveNginxProxy: np1Effective,
+				},
+				SectionName: aigwHR.Spec.ParentRefs[0].SectionName,
+				Attachment: &ParentRefAttachmentStatus{
+					Attached: true,
+					AcceptedHostnames: map[string][]string{
+						CreateGatewayListenerKey(
+							client.ObjectKeyFromObject(gw1.Source),
+							"listener-80-1",
+						): {"aigw.example.com"},
+					},
+					ListenerPort: 80,
+				},
+			},
+		},
+		Spec: L7RouteSpec{
+			Hostnames: aigwHR.Spec.Hostnames,
+			Rules: []RouteRule{
+				{
+					ValidMatches: true,
+					Filters: RouteRuleFilters{
+						Filters: []Filter{},
+						Valid:   true,
+					},
+					BackendRefs: []BackendRef{
+						{
+							SvcNsName: types.NamespacedName{Namespace: "ai-gateway", Name: "aigw"},
+							ServicePort: v1.ServicePort{
+								Port: 80,
+							},
+							Valid:              true,
+							Weight:             1,
+							InvalidForGateways: map[types.NamespacedName]conditions.Condition{},
+						},
+					},
+					Matches: []gatewayv1.HTTPRouteMatch{
+						{
+							Path: &gatewayv1.HTTPPathMatch{
+								Type:  helpers.GetPointer(gatewayv1.PathMatchPathPrefix),
+								Value: helpers.GetPointer("/aigw"),
+							},
+						},
+					},
+					RouteBackendRefs: []RouteBackendRef{
+						{
+							BackendRef: gatewayv1.BackendRef{
+								BackendObjectReference: gatewayv1.BackendObjectReference{
+									Group:     (*gatewayv1.Group)(helpers.GetPointer("inference.networking.x-k8s.io")),
+									Kind:      (*gatewayv1.Kind)(helpers.GetPointer("InferencePool")),
+									Name:      "aigw",
+									Namespace: (*gatewayv1.Namespace)(helpers.GetPointer(testNs)),
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
 	createExpectedGraphWithGatewayClass := func(gc *gatewayv1.GatewayClass) *Graph {
 		return &Graph{
 			GatewayClass: &GatewayClass{
@@ -1014,8 +1153,9 @@ func TestBuildGraph(t *testing.T) {
 							Valid:       true,
 							Attachable:  true,
 							Routes: map[RouteKey]*L7Route{
-								CreateRouteKey(hr1): routeHR1,
-								CreateRouteKey(gr):  routeGR,
+								CreateRouteKey(hr1):    routeHR1,
+								CreateRouteKey(gr):     routeGR,
+								CreateRouteKey(aigwHR): aigwR,
 							},
 							SupportedKinds:            supportedKindsForListeners,
 							L4Routes:                  map[L4RouteKey]*L4Route{},
@@ -1164,9 +1304,10 @@ func TestBuildGraph(t *testing.T) {
 				},
 			},
 			Routes: map[RouteKey]*L7Route{
-				CreateRouteKey(hr1): routeHR1,
-				CreateRouteKey(hr3): routeHR3,
-				CreateRouteKey(gr):  routeGR,
+				CreateRouteKey(hr1):    routeHR1,
+				CreateRouteKey(hr3):    routeHR3,
+				CreateRouteKey(gr):     routeGR,
+				CreateRouteKey(aigwHR): aigwR,
 			},
 			L4Routes: map[L4RouteKey]*L4Route{
 				CreateRouteKeyL4(tr):  routeTR,
@@ -1182,13 +1323,17 @@ func TestBuildGraph(t *testing.T) {
 				},
 			},
 			ReferencedNamespaces: map[types.NamespacedName]*v1.Namespace{
-				client.ObjectKeyFromObject(ns): ns,
+				client.ObjectKeyFromObject(ns):          ns,
+				client.ObjectKeyFromObject(aiGatewayNs): aiGatewayNs,
 			},
 			ReferencedServices: map[types.NamespacedName]*ReferencedService{
 				client.ObjectKeyFromObject(svc): {
 					GatewayNsNames: map[types.NamespacedName]struct{}{{Namespace: testNs, Name: "gateway-1"}: {}},
 				},
 				client.ObjectKeyFromObject(svc1): {
+					GatewayNsNames: map[types.NamespacedName]struct{}{{Namespace: testNs, Name: "gateway-1"}: {}},
+				},
+				client.ObjectKeyFromObject(aigwSvc): {
 					GatewayNsNames: map[types.NamespacedName]struct{}{{Namespace: testNs, Name: "gateway-1"}: {}},
 				},
 			},
